@@ -1,0 +1,50 @@
+# Create blue one
+
+ 0:00:00.00>NAVDB WORLDNAV
+ 0:00:00.00>NAVTYPE 0
+ 0:00:00.00>BGPASAS OFF
+ 0:00:00.00>echo on
+ 0:00:00.00>resonr 0
+ 0:00:00.00>swrnd on
+ 0:00:00.00>PAN DOGGA
+ 0:00:00.00>cre BRAVO,f16,  53.66451,    .46718,  99.5T FL100, 320
+ 0:00:00.00>OP;dtlook 0.0;swrad grid; rtf 10
+ 0:00:01.03>col BRAVO blue
+ 0:00:02.02>dest BRAVO ehtw
+
+# Define route
+
+ 0:00:03.01>addwpt bravo,legro,10000,320
+ 0:00:04.00>addwpt bravo,emlon,10000,320
+ 0:00:05.04>addwpt bravo,tulip,10000,320
+
+# Arm aircraft (arm = weapon command)
+
+ 0:00:06.03>weapon bravo,f16radar
+ 0:00:07.02>weapon bravo,AIM9,2
+ 0:00:07.50>arm    bravo,A120,4
+ 0:00:08.01>arm    bravo,chaff,30
+ 0:00:09.05>weapon bravo,flare,16
+
+# Add CAP pattern & specify mission
+
+ 0:00:10.00>addwpt bravo,irduk,10000,320,emlon
+ 0:00:11.00>addwpt bravo,otr80,10000,320,irduk
+ 0:00:11.00>addwpt bravo,legro,10000,320,otr80
+ 0:00:11.00>direct bravo,legro
+ 0:00:12.04>mission bravo CAP legro otr80
+
+# Adjust display pan & zoom & labels
+
+ 0:00:14.00>pan 53.63556 2.34791
+ 0:00:15.00>++;label
+
+# Create red foe
+
+ 0:00:36.51>cre rus,mg29,  54.53360,   2.28651, 170.8T FL100, 350
+ 0:00:37.00>color rus,orange  
+ 0:00:37.03>weapon rus,f16radar
+ 0:00:38.02>weapon rus,AA11,2
+ 0:00:38.02>weapon rus,AA12,4
+ 0:00:39.01>weapon rus,chaff,30
+ 0:00:40.05>weapon rus,flare,16
