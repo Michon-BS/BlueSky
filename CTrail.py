@@ -23,11 +23,9 @@ class Trails():
 
         self.dt = dttrail               # Resolution of trail pieces in time
 
-        self.col0 = np.array([[0],[0],[200]])           # Old trail colour
-        self.col1 = np.array([[0],[255],[255]])        # New trail colour
-        self.tcol0 = 60.                # After how many seconds old colour 
+        self.tcol0 = 60.                 # After how many seconds old colour 
 
-# Data on line pieces
+# Foreground data on line pieces
         self.lat0 = np.array([])
         self.lon0 = np.array([])
         self.lat1 = np.array([])
@@ -35,6 +33,16 @@ class Trails():
         self.time = np.array([])
         self.col  = np.array([]) 
         self.acid = []
+
+# background copy of data
+        self.bglat0 = np.array([])
+        self.bglon0 = np.array([])
+        self.bglat1 = np.array([])
+        self.bglon1 = np.array([])
+        self.bgtime = np.array([])
+        self.bgcol  = np.array([]) 
+        self.bgacid = []
+
         return
 
 #----------------------------------------------------------------------------
@@ -79,16 +87,36 @@ class Trails():
         self.time = np.concatenate((self.time,np.array(lsttime)))
 
 # Update colours
-        self.col = 1.-np.minimum(self.tcol0,np.abs(t-self.time))/self.tcol0
+        self.col = 255. *  \
+                  (1.-np.minimum(self.tcol0,np.abs(t-self.time))/self.tcol0)
 
 # Done
         return
+
 #----------------------------------------------------------------------------
-# Clear trails
+# Buffer trails: Move current stack to background
 
-    def clear(self):
+    def buffer(self):
+        
+        self.bglat0 = np.append(self.bglat0,self.lat0)
+        self.bglon0 = np.append(self.bglon0,self.lon0)
+        self.bglat1 = np.append(self.bglat1,self.lat1)
+        self.bglon1 = np.append(self.bglon1,self.lon1)
+        self.bgtime = np.append(self.bgtime,self.time)
+# No color saved: bBackground: always 'old color' self.col0
 
- # Data on line pieces
+        self.bgacid = self.bgacid + self.acid
+        
+        self.clearfg()  # Clear foreground trails
+
+        return
+
+#----------------------------------------------------------------------------
+# Clear trails foreground
+
+    def clearfg(self):   # Foreground
+
+ # Data on foreground line pieces
         self.lat0 = np.array([])
         self.lon0 = np.array([])
         self.lat1 = np.array([])
@@ -96,4 +124,29 @@ class Trails():
         self.time = np.array([])
         self.col  = np.array([]) 
         self.acid = []
-        return       
+
+        return       # Clear trails
+
+#----------------------------------------------------------------------------
+# Clear trails background
+
+    def clearbg(self):   # Background
+
+ # Data on background line pieces
+        self.bglat0 = np.array([])
+        self.bglon0 = np.array([])
+        self.bglat1 = np.array([])
+        self.bglon1 = np.array([])
+        self.bgtime = np.array([])
+        self.bgacid = []
+
+        return
+
+#----------------------------------------------------------------------------
+# Clear all data
+    def clear(self):   # Foreground and background
+
+        self.clearfg()
+        self.clearbg()
+
+        return           

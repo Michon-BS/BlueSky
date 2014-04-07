@@ -153,7 +153,8 @@ class Screen:
             reso = (self.width,self.height)
             self.win = pg.display.set_mode(reso)
 
-        pg.display.set_caption("BlueSky Open ATM Simulator","BlueSky")
+        pg.display.set_caption("BlueSky Open ATM Simulator (F11 = Full Screen)",
+                               "BlueSky")
         iconbmp = pg.image.load('icon.gif')        
         pg.display.set_icon(iconbmp)
 
@@ -347,7 +348,7 @@ class Screen:
                     pg.draw.line(self.radbmp,lightgreygreen, \
                                  (0,y),(self.width,y))
     
-# Draw coastlines
+#------ Draw coastlines
 
             if self.swgeo:
 #                cx,cy = -1,-1
@@ -366,7 +367,7 @@ class Screen:
                 for i in list(self.cstsel[0]):
                     pg.draw.line(self.radbmp,grey,(self.cx0[i],self.cy0[i]), \
                                                   (self.cx1[i],self.cy1[i]))
-# Draw FIRs
+#------ Draw FIRs
 
             if self.swfir:
                 self.firx0,self.firy0 = self.ll2xy(traf.navdb.firlat0,   \
@@ -380,7 +381,7 @@ class Screen:
                                  (self.firx0[i],self.firy0[i]), 
                                  (self.firx1[i],self.firy1[i]))
 
-# Waypoint symbols
+# -----------------Waypoint & airport symbols
 
 # Check whether we need to reselect waypoint set to be drawn
 
@@ -414,7 +415,7 @@ class Screen:
                 self.aptx,self.apty = self.ll2xy(traf.navdb.aplat,traf.navdb.aplon)
 
                    
-# Draw waypoints
+#------- Draw waypoints
 
             if self.wpsw>0:
 #                print len(self.wptsel)," waypoints"
@@ -448,7 +449,7 @@ class Screen:
 #                            self.fontnav.printat(self.radbmp,xtxt,ytxt, \
 #                                                         traf.navdb.wpid[i])
 
-# Draw airports
+#------- Draw airports
             if self.apsw>0:         
 #                if len(self.aptsel)<800:
     
@@ -470,7 +471,7 @@ class Screen:
                                                      traf.navdb.apid[i])
                             traf.navdb.apswbmp[i] = True
                             
-# In any case, blit it
+# In either case, blit it
                         xtxt = aptrect.right + 2
                         ytxt = aptrect.top
                         self.radbmp.blit(traf.navdb.aplabel[i],(xtxt,ytxt),\
@@ -480,7 +481,7 @@ class Screen:
 #                                                     traf.navdb.apid[i])
 
     
-# Draw traffic area
+#--------- Draw traffic area
             if traf.swarea and not self.swnavdisp:
                 x0,y0 = self.ll2xy(traf.arealat0,traf.arealon0)
                 x1,y1 = self.ll2xy(traf.arealat1,traf.arealon1)
@@ -491,6 +492,23 @@ class Screen:
                 pg.draw.line(self.radbmp,blue,(x0,y1),(x0,y0))
 
 #            print pg.time.get_ticks()*0.001-t0," seconds to draw coastlines"
+
+#---------- Draw background trails
+            if traf.swtrails:
+                traf.trails.buffer() # move all new trails to background
+
+                trlsel = list( np.where(
+                           self.onradar(traf.trails.bglat0,traf.trails.bglon0)+ \
+                           self.onradar(traf.trails.bglat1,traf.trails.bglon1))[0])
+    
+                x0,y0 = self.ll2xy(traf.trails.bglat0,traf.trails.bglon0)
+                x1,y1 = self.ll2xy(traf.trails.bglat1,traf.trails.bglon1)         
+
+                for i in trlsel:
+                    pg.draw.aaline(self.radbmp,(0,0,255),    \
+                                        (x0[i],y0[i]),(x1[i],y1[i]))
+                
+
 
 ## Draw metrics cells (by which switch?)
 #                
@@ -548,7 +566,7 @@ class Screen:
 # Draw last trail part
                 if traf.swtrails:
                     pg.draw.line(self.win,(0,255,255),
-                             (ltx[i],lty[i]), (trafx[i],trafy[i]) )
+                             (ltx[i],lty[i]), (trafx[i],trafy[i]))
 
      
 # Label text
@@ -598,10 +616,13 @@ class Screen:
                 x1,y1 = self.ll2xy(traf.trails.lat1,traf.trails.lon1)         
 
                 for i in trlsel:
-                    c = int(127+128*traf.trails.col[i])
-                    pg.draw.line(self.win,(0,c,255),    \
+                    pg.draw.line(self.win,(0,int(traf.trails.col[i]),255),   \
                                         (x0[i],y0[i]),(x1[i],y1[i]))
-    
+
+# Redraw background => buffer ; if >1500 foreground linepieces on screen
+                if len(trlsel)>1500:
+                     self.redrawradbg = True
+
 # Draw edit window
         self.editwin.update()
 
@@ -790,9 +811,9 @@ class Screen:
         pg.display.init()
 
         di = pg.display.Info()
-        caption = pg.display.get_caption()
 
-        pg.display.set_caption("BlueSky Open ATM Simulator","BlueSky")
+        pg.display.set_caption("BlueSky Open ATM Simulator (F11 = Full Screen)",
+                                  "BlueSky")
         iconbmp = pg.image.load('icon.gif')        
         pg.display.set_icon(iconbmp)
 
