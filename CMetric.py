@@ -17,8 +17,9 @@ Date        :
 """
 
 import time
-from CoCaMetric import *
-from CPAmetric import *
+from metric_CoCa import *
+from metric_HB import *
+from metric_Area import *
 from tools import tim2txt
 
 
@@ -47,18 +48,19 @@ class Metric():
 
         self.dt = 1  # [seconds]
         
-        region = regions()
+        self.metric_Area = metric_Area()
         
-        self.cells = region.makeRegions()
+        self.cells = self.metric_Area.makeRegions()
         self.metricstime = 0
         self.tbegin = 0
         
         
-        self.cellarea = region.cellArea()
-        self.metric = (CoCaMetric(region),CPAmetric(self.cellarea))
-        self.name = ("CoCa-Metric","CPA-Metric","Delete AC")
+        self.cellarea = self.metric_Area.cellArea()
+        self.metric = (metric_CoCa(self.metric_Area),metric_HB(self.cellarea))
+        self.name = ("CoCa-Metric","HB-Metric","Delete AC")
         self.metric_number = 1
-        
+        self.fir_circle_point = 0
+        self.fir_circle_radius = 0
     
         return
 
@@ -81,17 +83,15 @@ class Metric():
             self.tbegin = sim.t
             self.metricstime = 1
             print "METRICS STARTED"
+            self.fir_circle_point,self.fir_circle_radius = self.metric_Area.FIR_circle(traf.navdb,"EHAA",200)
             cmd.stack("AREA "+str(self.cellarea[2][0])+","+str(self.cellarea[2][1])+ \
                ","+str(self.cellarea[0][0])+","+str(self.cellarea[0][1]))
+        
 
-
-
+        
 # A lot of smart Michon-code here, probably using numpy arrays etc.
 
-        #self.metric.update_line(traf.ntraf,sim.t)
-#        if sim.t >= 25200 and sim.t <= 25201:
-#             cmd.stack("SAVEIC 7am")
-#             print "done"
+
 
                 
         
@@ -101,7 +101,9 @@ class Metric():
             elif self.metric_number == 1:
                 self.metric[self.metric_number].applymetric(traf,sim)
             
-            
+        print "Number of Aircraft in Research Area (FIR):"
+        print self.metric[self.metric_number].ntraf
+        
         deleteAC = []
         for i in range(0,traf.ntraf):
             if traf.avs[i] <= 0 and (traf.aalt[i]/ft) < 750 and traf.aspd[i] < 300:
