@@ -55,13 +55,13 @@ class ASAS():
         du = np.array(u - u.T)
         dv = np.array(v - v.T)
         
-        self.tcpa = -(du*dx + dv*dy) /      \
+        tcpa = -(du*dx + dv*dy) /      \
                  (du*du + dv*dv         \
                  + np.array(np.eye(du[:,0].size)))
 
 # Calculate CPA positions
-        xcpa = dx + self.tcpa*du
-        ycpa = dy + self.tcpa*dv
+        xcpa = dx + tcpa*du
+        ycpa = dy + tcpa*dv
 
         distcpa2 = xcpa*xcpa+ycpa*ycpa  # distance at CPA squared
 
@@ -81,6 +81,7 @@ class ASAS():
 
 # TODO: Calculate CPA positions of traffic in lat/lon
 
+# First try simplest method (mercator)
 
         return
                 

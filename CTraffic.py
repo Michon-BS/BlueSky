@@ -75,6 +75,7 @@ class Traffic():
         self.orig = []  # Four letter code of origin airport
         self.dest = []  # Four letter code of destination airport
 
+
 # LNAV route navigation
         self.swlnav   = np.array([])    # Lateral (HDG) based on nav?
         self.swvnav   = np.array([])    # Vertical/longitudinal (ALT+SPD) based on nav info
@@ -86,6 +87,9 @@ class Traffic():
 
 # Route info
         self.route = []
+
+# ASAS info per aircraft:
+        self.iconf = np.array([])    # index in 'conflicting' aircraft database
 
 # Display information on label
         self.label = [] # Text and bitmap of traffic label
@@ -126,7 +130,7 @@ class Traffic():
         self.metricSwitch = 0
         self.metric = Metric()
 
-# Bread crums for trails
+# Bread crumbs for trails
         self.lastlat = []
         self.lastlon = []
         self.lasttim = []
@@ -185,6 +189,9 @@ class Traffic():
 
 # Route info
         self.route.append(Route(self.navdb))  # create empty route connected with nav databse
+
+# ASAS info: no conflict => -1
+        self.iconf = np.append(self.iconf,-1.0) # index in 'conflicting' aircraft database
 
 # Area variable set to False to avoid deletion upon creation outside
         self.inside.append(False)
@@ -247,6 +254,9 @@ class Traffic():
 
 # Route info
         del self.route[idx]
+
+# ASAS info
+        self.iconf = np.delete(self.iconf,idx)
 
 # Metrics, area
         del self.inside[idx]

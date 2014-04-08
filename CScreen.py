@@ -86,11 +86,17 @@ class Screen:
 
 #----------------------------SYMBOLS-----------------------------
 
-# Read graphics for acsymbol
+# Read graphics for acsymbol (normal = green) + amber
         self.acsymbol=[]
         for i in range(60):
             self.acsymbol.append(pg.image.load
                               (sim.datadir+"graphics/acsymbol/acsymbol" \
+                                 +str(i)+".png"))
+
+        self.ambacsymbol=[]
+        for i in range(60):
+            self.ambacsymbol.append(pg.image.load
+                              (sim.datadir+"graphics/amb-acsymbol/amb-acsymbol" \
                                  +str(i)+".png"))
 
 # Lable lines& default no trails

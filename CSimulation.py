@@ -41,7 +41,7 @@ class Simulation:
         self.dts = []
 
 # Create datalog instance
-        self.data = CDatalog.Datalog()
+        self.log = CDatalog.Datalog()
 
 # Fixed dt mode for fast forward
         self.ffmode = False  # Default FF off
@@ -108,7 +108,7 @@ class Simulation:
 
     def stop(self):  # Quit mode
         self.mode   = self.end
-        self.data.save()
+        self.log.save()
         return
         
     def play(self): # Back to op-mode: run after HOLD/PAUSE
