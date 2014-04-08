@@ -14,6 +14,8 @@ Modifation  :
 By          :
 Date        :
 
+GitHub Metric, full collaborator MICHON-BS!!
+
 """
 
 import time
