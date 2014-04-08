@@ -22,7 +22,7 @@ import collections
 #                cx,cy = x,y
             
 
-class CoCaMetric():
+class metric_CoCa():
     
     def __init__(self,regions):
         
@@ -62,7 +62,7 @@ class CoCaMetric():
         self.precocametric = np.zeros((numberofrows,5), dtype = ndtype)
         self.cocametric = np.zeros((numberofrows,6), dtype = ndtype)
         plt.ion()
-        
+        self.ntraf = 0
         
         
         #plt.colorbar()
@@ -434,75 +434,4 @@ class CoCaMetric():
                      
         return
    
-class regions():    
-
-    def __init__(self):
-        self.lat = 53.8
-        self.lon = 2
-        self.fll = 8500
-        self.flu = 41500
-        self.bearingS = 180
-        self.bearingE = 90
-        self.deltaFL = 3000
-        self.distance = 20
-        self.ncells = 12
-        self.nlevels = 12
- 
-        self.regions = np.array([0,0,0])   
-    
-    def addbox(self,lat,lon):
-        
-        lat_0 = lat
-        lat_00 = lat
-        lon_0 = lon
-        londiviser = 1
-        for i in range(1,self.ncells+1):
-            for j in range(1,self.ncells+1):                
-                for k in range(self.fll,self.flu+self.deltaFL,self.deltaFL):
-                    box = np.array([lat,lon,k])
-                    self.regions = np.vstack([self.regions,box])
-            
-                if i == 1:
-                    
-                    lat,lon = qdrpos(lat,lon,self.bearingE,self.distance)
-                    lat = degrees(lat)
-                    lon = degrees(lon)
-                    londiviser = (lon - lon_0) / self.ncells
-                else:
-                    lat,lon = qdrpos(lat,lon,self.bearingE,self.distance)
-                    lat = degrees(lat)
-                    lon = lon_0 + londiviser * j
-            
-            lat_0 = lat_00            
-            lat,lon = qdrpos(lat_0,lon_0,self.bearingS,self.distance*i)
-            lat = degrees(lat)
-            lon = degrees(lon)
-            lat_0 = lat
-
-        return
-        
-    def cellArea(self):
-        point1 = [self.regions[0,0],self.regions[0,1]]
-        point2 = [self.regions[self.ncells*self.nlevels-1,0],self.regions[self.ncells*self.nlevels-1,1]]
-        point3 = [self.regions[(self.ncells-1)*self.ncells*self.nlevels,0],self.regions[(self.ncells-1)*self.ncells*self.nlevels,1]]
-        point4 = [self.regions[self.ncells*self.ncells*self.nlevels-1,0],self.regions[self.ncells*self.ncells*self.nlevels-1,1]]
-        self.cellarea = np.array([point4,point2,point1,point3])
-        #print self.cellarea
-
-        return self.cellarea    
-    
-    def makeRegions(self):
-        
-        
-            
-        lat = self.lat
-        lon = self.lon
-        
-          
-        self.addbox(lat,lon)
-        self.regions = np.delete(self.regions, (0), axis=0)
-        
-        
-        
-        return self.regions
 

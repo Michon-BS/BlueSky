@@ -13,9 +13,9 @@ from time import time as tt
 import matplotlib.pyplot as plt
 import csv
 from itertools import izip
+import matplotlib.nxutils as nx
 
-
-class CPAmetric():
+class metric_HB():
     
     
     def __init__(self,area):
@@ -48,10 +48,42 @@ class CPAmetric():
         self.compl_ac = 0
         self.time_lookahead = 1800 #seconds
         
-
+        self.selected_area = ([area[0][0],area[0][1]],[area[1][0],area[1][1]],[area[2][0],area[2][1]],[area[3][0],area[3][1]])
 
         return
 
+    def selectTraffic(self,traf):
+        
+        traf_selected_lat = np.array([])        
+        traf_selected_lon = np.array([]) 
+        traf_selected_alt = np.array([]) 
+        traf_selected_tas = np.array([]) 
+        traf_selected_trk = np.array([]) 
+        traf_selected_ntraf = 0
+#       RECTANGLE AREA 
+#        for i in range(0,traf.ntraf):
+#            if nx.pnpoly(traf.lat[i],traf.lon[i],self.selected_area) == 1:
+#                traf_selected_lat = np.append(traf_selected_lat,traf.lat[i])
+#                traf_selected_lon = np.append(traf_selected_lon,traf.lon[i])
+#                traf_selected_alt = np.append(traf_selected_alt,traf.alt[i])
+#                traf_selected_tas = np.append(traf_selected_tas,traf.tas[i])
+#                traf_selected_trk = np.append( traf_selected_trk,traf.trk[i])
+#                traf_selected_ntraf = traf_selected_ntraf + 1
+#        
+        # CIRCLE AREA (FIR Circle)
+        for i in range(0,traf.ntraf):
+            dist = latlondist(traf.metric.fir_circle_point[0],traf.metric.fir_circle_point[1],traf.lat[i],traf.lon[i])
+            
+            if  dist/nm < traf.metric.fir_circle_radius:
+                traf_selected_lat = np.append(traf_selected_lat,traf.lat[i])
+                traf_selected_lon = np.append(traf_selected_lon,traf.lon[i])
+                traf_selected_alt = np.append(traf_selected_alt,traf.alt[i])
+                traf_selected_tas = np.append(traf_selected_tas,traf.tas[i])
+                traf_selected_trk = np.append( traf_selected_trk,traf.trk[i])
+                traf_selected_ntraf = traf_selected_ntraf + 1
+        
+        
+        return traf_selected_lat,traf_selected_lon,traf_selected_alt,traf_selected_tas,traf_selected_trk,traf_selected_ntraf
 
     def applymetric(self,traf,sim):
         time1 = tt()
@@ -66,9 +98,10 @@ class CPAmetric():
         self.id = []
         self.alt_dif = 0
 
+        traf_selected_lat,traf_selected_lon,traf_selected_alt,traf_selected_tas,traf_selected_trk,traf_selected_ntraf = self.selectTraffic(traf)
  
 
-        [self.rel_trk, self.pos] = qdrdist_vector(self.initiallat,self.initiallon,np.mat(traf.lat),np.mat(traf.lon))
+        [self.rel_trk, self.pos] = qdrdist_vector(self.initiallat,self.initiallon,np.mat(traf_selected_lat),np.mat(traf_selected_lon))
 #        self.lat = np.append(self.lat,traf.lat)
 #        self.lon = np.append(self.lon,traf.lon)
         self.id = traf.id
@@ -82,25 +115,27 @@ class CPAmetric():
         self.posx = np.mat(np.array(self.pos) * np.array(anglex)) #nm
         self.posy = np.mat(np.array(self.pos) * np.array(angley)) #nm
         
-        self.lat = traf.lat
-        self.lon = traf.lon
+        self.lat = traf_selected_lat
+        self.lon = traf_selected_lon
 
-        self.alt = np.mat(traf.alt/ft)
-        self.spd = traf.tas/nm #nm/s
-        self.trk = traf.trk
-        self.ntraf = traf.ntraf
+        self.alt = np.mat(traf_selected_alt/ft)
+        self.spd = traf_selected_tas/nm #nm/s
+        self.trk = traf_selected_trk
+        self.ntraf = traf_selected_ntraf
 
+        self.alt_dif = self.alt-self.alt.T
         #Vectors CPA_dist and CPA_time
         #self.rel_vectors()
         
 
-        print "NEW"
         
         #self.apply_heading_range()
         self.apply_twoCircleMethod()
         #self.saveData()
         time2 = tt()
+        print "Time to Complete Calculation: "
         print (time2-time1)
+        
         sim.play()
         return        
     
@@ -268,8 +303,9 @@ class CPAmetric():
 #        
         self.complexity[self.step][0] = Compl_ac #/ self.ntraf
         self.complexity[self.step][1] = Compl_ac / self.ntraf
-        print Compl_ac
-        print Compl_ac / self.ntraf
+        
+        print "Complexity per Aircraft: "
+        print self.complexity[self.step][1]
         #self.complexity_plot()
         #self.saveData()
         
@@ -498,7 +534,7 @@ class CPAmetric():
         ntraf = np.repeat(np.array(self.ntraf),len(trk))
         ntraf = np.array(ntraf).reshape(-1,).tolist()
 
-        data = izip(acid,lat,lon,alt,spd,trk,ntraf)
+        data = izip(acid,lat,lon,alt,spd,trk,ntraf,compl)
         
         step = str(self.step).zfill(3)
         fname = "./output/Hdg_Metric/"+step+"-BlueSky.csv"
