@@ -405,7 +405,6 @@ class Traffic():
                              self.alt[i] >= self.areafloor and      \
                             (self.alt[i] >= 1500 or self.swtaxi)
                 elif self.area == "Circle":
-                    
                     if latlondist(self.lat[i],self.lon[i], self.metric.fir_circle_point[0],self.metric.fir_circle_point[1]) < (self.metric.fir_circle_radius*nm):# and (self.alt[i] >= 1500 or self.swtaxi):
                         inside = True
                     else:

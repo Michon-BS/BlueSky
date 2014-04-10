@@ -762,18 +762,20 @@ class Commandstack:
                             scr.echo("Metric is off")
 
                         elif metric_number <= len(traf.metric.name) and metric_number >= 0:
-                            traf.metric.metric_number = metric_number
-                            traf.metricSwitch = 1
-                            scr.echo("("+str(traf.metric.metric_number+1)+") "+traf.metric.name[traf.metric.metric_number]+" activated")
-                            try:
-                                metric_dt = float(cmdargs[2])
-                                if metric_dt > 0:
-                                    traf.metric.dt = metric_dt
-                                    scr.echo("with dt = "+str(metric_dt))
-                                else:
-                                    scr.echo("No valid dt")  
-                            except:
-                                scr.echo("with dt = "+str(traf.metric.dt))
+                            if traf.area == "Circle":
+                                traf.metricSwitch = 1
+                                scr.echo("("+str(traf.metric.metric_number+1)+") "+traf.metric.name[traf.metric.metric_number]+" activated")
+                                try:
+                                    metric_dt = float(cmdargs[2])
+                                    if metric_dt > 0:
+                                        traf.metric.dt = metric_dt
+                                        scr.echo("with dt = "+str(metric_dt))
+                                    else:
+                                        scr.echo("No valid dt")  
+                                except:
+                                    scr.echo("with dt = "+str(traf.metric.dt))
+                            else:
+                                scr.echo("First define AREA FIR")
                         else:
                             scr.echo("No such metric")
                         

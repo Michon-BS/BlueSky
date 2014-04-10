@@ -504,9 +504,9 @@ class Screen:
                 if traf.area == "Circle":
                     
                     lat2_circle,lon2_circle = qdrpos(traf.metric.fir_circle_point[0],traf.metric.fir_circle_point[1],180,traf.metric.fir_circle_radius)
-
+                    
                     x_circle,y_circle = self.ll2xy(traf.metric.fir_circle_point[0], traf.metric.fir_circle_point[1])
-                    x2_circle,y2_circle = self.ll2xy(degrees(lat2_circle),degrees(lon2_circle))
+                    x2_circle,y2_circle = self.ll2xy(lat2_circle,lon2_circle)
                     radius = int(abs(y2_circle-y_circle))
                     
                     pg.draw.circle(self.radbmp,blue,(int(x_circle),int(y_circle)),radius, 2)
