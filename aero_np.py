@@ -439,7 +439,7 @@ def qdrpos(latd1,lond1,qdr,dist): # input in deg and nm
 #      latd1,lond1  [deg]   ref position
 #      qdr          [deg]   bearing from 1 to 2
 # Out:
-#      latd2,lond2
+#      latd2,lond2 (IN DEGREES!)
 #
 # Ref for qdrpos: http://www.movable-type.co.uk/scripts/latlong.html
 

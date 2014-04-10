@@ -63,6 +63,7 @@ class Metric():
         self.metric_number = 1
         self.fir_circle_point = 0
         self.fir_circle_radius = 0
+        self.fir_number = 0
     
         return
 
@@ -85,9 +86,9 @@ class Metric():
             self.tbegin = sim.t
             self.metricstime = 1
             print "METRICS STARTED"
-            self.fir_circle_point,self.fir_circle_radius = self.metric_Area.FIR_circle(traf.navdb,"EHAA",200)
-            cmd.stack("AREA "+str(self.cellarea[2][0])+","+str(self.cellarea[2][1])+ \
-               ","+str(self.cellarea[0][0])+","+str(self.cellarea[0][1]))
+            #FIR_circle(traf.navdb,self.fir_number)
+            #cmd.stack("AREA "+str(self.cellarea[2][0])+","+str(self.cellarea[2][1])+ \
+            #   ","+str(self.cellarea[0][0])+","+str(self.cellarea[0][1]))
         
 
         

@@ -30,8 +30,9 @@ import numpy as np
 import splash
 from fastfont import CFastfont
 from CEditWin import EditWin
-from aero_np import ft,kts,nm,latlondist,qdrdist
+from aero_np import ft,kts,nm,latlondist,qdrdist,qdrpos
 from tools import tim2txt
+
 
 
 #-----------------------------------------------------------------
@@ -489,13 +490,27 @@ class Screen:
     
 #--------- Draw traffic area
             if traf.swarea and not self.swnavdisp:
-                x0,y0 = self.ll2xy(traf.arealat0,traf.arealon0)
-                x1,y1 = self.ll2xy(traf.arealat1,traf.arealon1)
-               
-                pg.draw.line(self.radbmp,blue,(x0,y0),(x1,y0))
-                pg.draw.line(self.radbmp,blue,(x1,y0),(x1,y1))
-                pg.draw.line(self.radbmp,blue,(x1,y1),(x0,y1))
-                pg.draw.line(self.radbmp,blue,(x0,y1),(x0,y0))
+                
+                if traf.area == "Square":
+                    x0,y0 = self.ll2xy(traf.arealat0,traf.arealon0)
+                    x1,y1 = self.ll2xy(traf.arealat1,traf.arealon1)
+    
+                    pg.draw.line(self.radbmp,blue,(x0,y0),(x1,y0))
+                    pg.draw.line(self.radbmp,blue,(x1,y0),(x1,y1))
+                    pg.draw.line(self.radbmp,blue,(x1,y1),(x0,y1))
+                    pg.draw.line(self.radbmp,blue,(x0,y1),(x0,y0))
+                
+                #FIR CIRCLE
+                if traf.area == "Circle":
+                    
+                    lat2_circle,lon2_circle = qdrpos(traf.metric.fir_circle_point[0],traf.metric.fir_circle_point[1],180,traf.metric.fir_circle_radius)
+
+                    x_circle,y_circle = self.ll2xy(traf.metric.fir_circle_point[0], traf.metric.fir_circle_point[1])
+                    x2_circle,y2_circle = self.ll2xy(degrees(lat2_circle),degrees(lon2_circle))
+                    radius = int(abs(y2_circle-y_circle))
+                    
+                    pg.draw.circle(self.radbmp,blue,(int(x_circle),int(y_circle)),radius, 2)
+
 
 #            print pg.time.get_ticks()*0.001-t0," seconds to draw coastlines"
 

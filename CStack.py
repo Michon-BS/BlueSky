@@ -167,7 +167,7 @@ class Commandstack:
                     isec = float(tstamp[6:8]+"."+tstamp[9:11])
                     self.scentime = ihr*3600.+imin*60.+isec
                 except:
-                    self.linenr = self.liner+1
+                    self.linenr = self.linenr+1
             else:
                 self.scentime = 999999999.
         return
@@ -779,16 +779,28 @@ class Commandstack:
                         
                    
 #----------------------------------------------------------------------    
-# AREA command: AREA lat0,lon0,lat1,lon1[,lowalt]            
+# AREA command: AREA lat0,lon0,lat1,lon1[,lowalt]  
+#               AREA FIR fir radius [lowalt]
                 elif cmd=="AREA":
-                    if numargs<4 and cmdargs[1]!="OFF":
+
+                    if numargs == 0:
                         scr.echo("AREA lat0,lon0,lat1,lon1[,lowalt]")
+                        scr.echo("or")
+                        scr.echo("AREA fir,radius[,lowalt]")
+                    elif numargs == 1 and cmdargs[1]!="OFF" and cmdargs[1]!="FIR":
+                        scr.echo("AREA lat0,lon0,lat1,lon1[,lowalt]")
+                        scr.echo("or")
+                        scr.echo("AREA fir,radius[,lowalt]")
                     elif numargs==1:
                         if cmdargs[1]=="OFF":
                             traf.swarea = False
                             scr.redrawradbg = True
-                    else:
+                            traf.area = ""
+                        if cmdargs[1] == "FIR":
+                            scr.echo("Specify FIR")
 
+                    elif numargs > 1 and cmdargs[1][0].isdigit():
+                        
                         lat0 = float(cmdargs[1])  # [deg]
                         lon0 = float(cmdargs[2])  # [deg]
                         lat1 = float(cmdargs[3])  # [deg]
@@ -803,12 +815,41 @@ class Commandstack:
                             traf.areafloor = float(cmdargs[5])*ft
                         else:
                             traf.areafloor = -9999999.
- 
+                        
+                        traf.area = "Square"
                         traf.swarea = True
                         scr.redrawradbg = True
 
 # Avoid mass delete due to redefinition of area
                         traf.inside = traf.ntraf*[False]
+                    
+                    elif numargs > 2 and cmdargs[1] == "FIR":
+                                              
+                        for i in range(0,len(traf.navdb.fir)):
+                            if cmdargs[2] == traf.navdb.fir[i][0]:
+                                break
+                        traf.metric.fir_number = i
+                        if cmdargs[2] != traf.navdb.fir[i][0]:
+                              scr.echo("Uknown FIR, try again")  
+                        traf.metric.fir_circle_point = traf.metric.metric_Area.FIR_circle(traf.navdb,traf.metric.fir_number)                        
+                        traf.metric.fir_circle_radius = float(cmdargs[3])
+                        
+                        if numargs==4:
+                            traf.areafloor = float(cmdargs[4])*ft
+                        else:
+                            traf.areafloor = -9999999.
+                        if numargs > 4:
+                            scr.echo("AREA command unknown")
+                            
+                        traf.area = "Circle"
+                        traf.swarea = True
+                        scr.redrawradbg = True
+                        traf.inside = traf.ntraf*[False]
+                    else:
+                        scr.echo("AREA command unknown")
+                        scr.echo("AREA lat0,lon0,lat1,lon1[,lowalt]")
+                        scr.echo("or")
+                        scr.echo("AREA fir,radius[,lowalt]")
 
 #----------------------------------------------------------------------    
 # TAXI command: TAXI ON/OFF : if off, autodelete descending aircraft 

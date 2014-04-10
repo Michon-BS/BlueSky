@@ -25,7 +25,8 @@ import random
 from math import *
 
 from aero import  fpm, kts, nm, g0, eas2tas, tas2eas, tas2cas, density, Rearth
-from aero_np import vatmos,vcas2tas,vtas2cas, qdrdist
+from aero_np import vatmos,vcas2tas,vtas2cas, qdrdist,latlondist
+
 
 from CMetric import Metric
 from CNavdb  import Navdatabase
@@ -125,6 +126,8 @@ class Traffic():
 # Taxi switch
         self.swtaxi =  False  # Default OFF: delwte traffic below 1500 ft
 
+# Research Area ("Square" for Square, "Circle" for Circle area)
+        self.area = "" 
 
 # Metrics
         self.metricSwitch = 0
@@ -396,11 +399,17 @@ class Traffic():
             for i in xrange(self.ntraf):
 
 # Current status
-                inside = self.arealat0 <= self.lat[i] <= self.arealat1   and \
-                         self.arealon0 <= self.lon[i] <= self.arealon1   and \
-                         self.alt[i] >= self.areafloor and      \
-                        (self.alt[i] >= 1500 or self.swtaxi)
-
+                if self.area == "Square":
+                    inside = self.arealat0 <= self.lat[i] <= self.arealat1   and \
+                             self.arealon0 <= self.lon[i] <= self.arealon1   and \
+                             self.alt[i] >= self.areafloor and      \
+                            (self.alt[i] >= 1500 or self.swtaxi)
+                elif self.area == "Circle":
+                    
+                    if latlondist(self.lat[i],self.lon[i], self.metric.fir_circle_point[0],self.metric.fir_circle_point[1]) < (self.metric.fir_circle_radius*nm):# and (self.alt[i] >= 1500 or self.swtaxi):
+                        inside = True
+                    else:
+                        inside  = False
 # Compare with previous: when leaving area: delete command
                 if self.inside[i] and not inside:
                     cmd.stack("DEL "+self.id[i])

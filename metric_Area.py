@@ -117,22 +117,21 @@ class metric_Area():
         return (result_x, result_y)
         
         
-    def FIR_circle(self,navdb,firname_user,fir_radius):
+    def FIR_circle(self,navdb,fir_number):
         
         fir_lat = []
         fir_lon = []
         fir = []
-        for i in range(0,len(navdb.fir)):
-            if firname_user == navdb.fir[i][0]:
-                fir_lat.append(navdb.fir[i][1])
-                fir_lon.append(navdb.fir[i][2])
-                fir.append((fir_lat[-1],fir_lon[-1]))
+
+        fir_lat.append(navdb.fir[fir_number][1])
+        fir_lon.append(navdb.fir[fir_number][2])
+        fir.append((fir_lat[-1],fir_lon[-1]))
         
         fir = fir[0]
         fir = zip(fir[0],fir[1])
         fir_centroid = self.centroid_of_polygon(fir)
         
-        return fir_centroid,fir_radius
+        return fir_centroid
         
 
 

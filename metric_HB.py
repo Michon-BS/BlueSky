@@ -122,7 +122,7 @@ class metric_HB():
         self.spd = traf_selected_tas/nm #nm/s
         self.trk = traf_selected_trk
         self.ntraf = traf_selected_ntraf
-
+        
         self.alt_dif = self.alt-self.alt.T
         #Vectors CPA_dist and CPA_time
         #self.rel_vectors()
@@ -215,7 +215,21 @@ class metric_HB():
                 
         return S0
 
-
+    def merge(self,times):
+            if len(times) > 0:
+                saved = list(times[0])
+                
+                for st, en in sorted([(t) for t in times]):
+                    if st <= saved[1]:
+                        saved[1] = max(saved[1], en)
+                    else:
+                        yield list(saved)
+                        saved[0] = st
+                        saved[1] = en
+                yield list(saved)
+            else:
+                yield list(times)
+    
     def apply_twoCircleMethod(self):
         
         Va = np.mat(self.spd)
@@ -273,45 +287,91 @@ class metric_HB():
 
         ha_1,ha_2,ha_3,ha_4,t1,t2,t3,t4 = self.conditions(ha_1,ha_2,ha_3,ha_4,t1,t2,t3,t4,Va,Vb,Ha,Hb)
         
-    
-
-        
-        ### MAKE COMPLEXITY SCORE
-        diff_1_2 = np.subtract(ha_1,ha_2)
-        diff_1_2 = np.abs((diff_1_2 + 180) % 360 - 180)
-
-        
-        diff_3_4 = np.subtract(ha_3,ha_4)
-        diff_3_4 = np.abs((diff_3_4 + 180)  % 360 - 180)
-        
         ## Condition where S0 < self.dist_range
         condition = np.multiply(S0<self.dist_range,S0>0)
-        condition = np.invert(condition)
-        diff_1_2 = np.where(condition,diff_1_2,180)
-        diff_3_4 = np.where(condition,diff_3_4,180)
+           
         
+        ac_angles = {}
+        ac_score = {}
+        for k in range(0,self.ntraf):
+            ac_angles[str(k)] = []
+            ac_score[str(k)] = 0
+            for l in range(0,self.ntraf):
+                if not m.isnan(ha_1[l,k]) and not m.isnan(ha_2[l,k]):
+                    ac_angles[str(k)].append((ha_1[l,k],ha_2[l,k]))
+                if not m.isnan(ha_3[l,k]) and not m.isnan(ha_4[l,k]):
+                    ac_angles[str(k)].append((ha_3[l,k],ha_4[l,k]))
         
-        ##now combine into 1 complexity score
-        Compl_1 = np.divide(diff_1_2,360)
-        Compl_2 = np.divide(diff_3_4,360)
-        Compl_12ac = np.vstack((Compl_1,Compl_2))
-        self.compl_ac = np.nansum(Compl_12ac, axis = 0)
+            ac_angles[str(k)] = sorted(ac_angles[str(k)])
+            ac_angles[str(k)] = list(self.merge(ac_angles[str(k)]))
+            if len(ac_angles[str(k)][0]) > 0:
+                for z in range(0,len(ac_angles[str(k)])):
+                    
+                    
+                    ac_angle180min = ((self.trk[k]+180-90)%360-180)
+                    ac_angle180max = ((self.trk[k]+180+90)%360-180)
+                    ac_angles_st180 = ((ac_angles[str(k)][z][0]+180)%360-180)
+                    ac_angles_en180 = ((ac_angles[str(k)][z][-1]+180)%360-180)
+                    
+                    ac_angle360min = (self.trk[k]+360-90)%360
+                    ac_angle360max = (self.trk[k]+360+90)%360
+                    ac_angles_st360 = (ac_angles_st180+360)%360
+                    ac_angles_en360 = (ac_angles_en180+360)%360
+                    
+                                       
+                    
+                    if ac_angle180min<90 and ac_angle180min>-90:
+                        if ac_angles_st180 < ac_angle180min:
+                            ac_angles[str(k)][z][0] = ac_angle180min
+                    else:
+                        if ac_angles_st360 < ac_angle360min:
+                            ac_angles[str(k)][z][0] = ac_angle180min
+                    
+                    if ac_angle180max < 90 and ac_angle180max > -90:
+                        if ac_angles_en180 > ac_angle180max:
+                            ac_angles[str(k)][z][-1] = ac_angle180max
+                    else:
+                        if ac_angles_en360 > ac_angle360max:
+                            ac_angles[str(k)][z][-1] = ac_angle180max
+                                        
+                    
+                    if (ac_angles_st180 < ac_angle180min and ac_angles_en180 < ac_angle180min) or (ac_angles_st360 < ac_angle360min and ac_angles_en360 < ac_angle360min):
+                        ac_angles[str(k)][z] = [np.nan,np.nan]
+                
+                    #Complexity Score
+                    
+                    if ac_angles[str(k)][z][-1]<90 and ac_angles[str(k)][z][-1]>-90:
+                        ac_score[str(k)] = ac_score[str(k)] + (ac_angles[str(k)][z][-1]-ac_angles[str(k)][z][0])/180
+                    else:
+                        ac_score[str(k)] = ac_score[str(k)] + (ac_angles[str(k)][z][-1]+360-ac_angles[str(k)][z][0])/180
+
+            if True in condition[k]:
+                ac_score[str(k)] = 1
+            
+            if m.isnan(ac_score[str(k)]):
+                ac_score[str(k)] = 0
+            
         
 
         
-        Compl_ac = np.nansum(self.compl_ac)
-#        
-        self.complexity[self.step][0] = Compl_ac #/ self.ntraf
-        self.complexity[self.step][1] = Compl_ac / self.ntraf
+        ac_totalscore =  sum(ac_score.itervalues())
+        
+        #        
+        self.complexity[self.step][0] = ac_totalscore #/ self.ntraf
+        self.complexity[self.step][1] = ac_totalscore / self.ntraf
         
         print "Complexity per Aircraft: "
         print self.complexity[self.step][1]
         #self.complexity_plot()
-        #self.saveData()
+        
         
         
         return
-
+        
+        
+            
+        
+        
 
     def calc_angles(self,Vb,Hb,VaVa,H0,arcsin,S0):
         
@@ -537,7 +597,7 @@ class metric_HB():
         data = izip(acid,lat,lon,alt,spd,trk,ntraf,compl)
         
         step = str(self.step).zfill(3)
-        fname = "./output/Hdg_Metric/"+step+"-BlueSky.csv"
+        fname = "./output/Metric-HB/"+step+"-BlueSky.csv"
         f = csv.writer(open(fname, "wb"))
         for row in data:
             
@@ -549,7 +609,6 @@ class metric_HB():
         
         
         return
-
 
     def complexity_plot(self):
         if self.step == 0:
