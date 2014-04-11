@@ -405,10 +405,25 @@ class Traffic():
                              self.alt[i] >= self.areafloor and      \
                             (self.alt[i] >= 1500 or self.swtaxi)
                 elif self.area == "Circle":
-                    if latlondist(self.lat[i],self.lon[i], self.metric.fir_circle_point[0],self.metric.fir_circle_point[1]) < (self.metric.fir_circle_radius*nm):# and (self.alt[i] >= 1500 or self.swtaxi):
-                        inside = True
-                    else:
-                        inside  = False
+                    
+                    ## Average of lat
+                    latavg = (radians(self.lat[i])+radians(self.metric.fir_circle_point[0]))/2
+                    cosdlat = (cos(latavg))
+                    
+                    #Distance x to centroid
+                    dx = (self.lon[i] - self.metric.fir_circle_point[1])*cosdlat*60
+                    dx2 = dx*dx
+                    
+                    #Distance y to centroid
+                    dy = self.lat[i] - self.metric.fir_circle_point[0]
+                    dy2 = dy*dy*3600
+                    
+                    #Radius squared
+                    r2 = self.metric.fir_circle_radius*self.metric.fir_circle_radius
+                   
+                    #Inside if smaller
+                    inside =  (dx2+dy2) < r2
+                    
 # Compare with previous: when leaving area: delete command
                 if self.inside[i] and not inside:
                     cmd.stack("DEL "+self.id[i])
