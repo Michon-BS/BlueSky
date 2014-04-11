@@ -455,7 +455,7 @@ def qdrpos(latd1,lond1,qdr,dist): # input in deg and nm
 
     lon2 = lon1 + atan2(sin(radians(qdr))*sin(dist/R)*cos(lat1), 
                      cos(dist/R) - sin(lat1)*sin(lat2))
-    return lat2,lon2
+    return degrees(lat2),degrees(lon2)
 #
 #la1 = np.array([52.,34.,-10.,10.])
 #lo1 = np.array([4.,-12,34.,12.])

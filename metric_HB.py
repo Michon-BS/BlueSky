@@ -72,6 +72,7 @@ class metric_HB():
 #        
         # CIRCLE AREA (FIR Circle)
         for i in range(0,traf.ntraf):
+            
             dist = latlondist(traf.metric.fir_circle_point[0],traf.metric.fir_circle_point[1],traf.lat[i],traf.lon[i])
             
             if  dist/nm < traf.metric.fir_circle_radius:
