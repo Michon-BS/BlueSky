@@ -24,7 +24,6 @@ Date        :
 
 """
 
-
 from math import *
 from random import random,randint
 import os
@@ -153,23 +152,32 @@ class Commandstack:
                    and self.linenr<len(self.scenlines):
             line = self.scenlines[self.linenr]
             self.linenr = self.linenr+1
-            
-            if line[0]!="#" and len(line.strip())>12:
-                self.stack(line[12:])            
+   
+            icmdline = line.find('>')         
+            if line[0]!="#" and icmdline>0 and len(line)>icmdline:
+                self.stack(line[icmdline+1:])            
                 n = n+1
     
             if self.linenr<len(self.scenlines):
                 line = self.scenlines[self.linenr]
-                try:                    
-                    tstamp = self.scenlines[self.linenr][:11]
-                    ihr = int(tstamp[:2])
-                    imin = int(tstamp[3:5])
-                    isec = float(tstamp[6:8]+"."+tstamp[9:11])
-                    self.scentime = ihr*3600.+imin*60.+isec
-                except:
+
+# Try reading timestamp and command    
+                try:
+                    icmdline = line.index('>')
+                    tstamp = line[:icmdline]
+                    ttxt = tstamp.strip().split(':')
+                    ihr = int(ttxt[0])
+                    imin = int(ttxt[1])
+                    xsec = float(ttxt[2])
+                    self.scentime = ihr*3600.+imin*60.+xsec
+
+# No command or timestamp found
+                except: 
                     self.linenr = self.linenr+1
+
             else:
                 self.scentime = 999999999.
+
         return
         
     def saveic(self,fname,sim,traf):
@@ -1033,13 +1041,14 @@ class Commandstack:
 
 
 #----------------------------------------------------------------------    
-# Insert new command here: first three chars should be unique            
-                elif cmd[:3]=="XXX":
+# ADDWPT   : stub            
+                elif cmd=="ADDWPT":
                     if numargs==0:
-                        scr.echo("cmd arg1, arg2")
+                        scr.echo("ADDWPT under construction")
                     else:
                         arg1 = cmdargs[1]  # arguments are strings
                         arg2 = cmdargs[2]  # arguments are strings
+
 #----------------------------------------------------------------------    
 # Insert new command here: first three chars should be unique            
                 elif cmd[:3]=="XXX":
