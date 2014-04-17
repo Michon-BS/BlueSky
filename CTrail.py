@@ -23,7 +23,15 @@ class Trails():
 
         self.dt = dttrail               # Resolution of trail pieces in time
 
-        self.tcol0 = 60.                 # After how many seconds old colour 
+        self.tcol0 = 60.  # After how many seconds old colour
+
+
+# This list contains some standard colors
+        self.colorList = {'BLUE': np.array([0, 0, 255]),      \
+                          'RED': np.array([255, 0, 0]),       \
+                          'YELLOW': np.array([255, 255, 0])}
+# Set default color to Blue
+        self.defcolor = self.colorList['BLUE']
 
 # Foreground data on line pieces
         self.lat0 = np.array([])
@@ -31,7 +39,8 @@ class Trails():
         self.lat1 = np.array([])
         self.lon1 = np.array([])
         self.time = np.array([])
-        self.col  = np.array([]) 
+        self.col  = []
+        self.fcol = np.array([])
         self.acid = []
 
 # background copy of data
@@ -40,7 +49,7 @@ class Trails():
         self.bglat1 = np.array([])
         self.bglon1 = np.array([])
         self.bgtime = np.array([])
-        self.bgcol  = np.array([]) 
+        self.bgcol  = [] 
         self.bgacid = []
 
         return
@@ -48,7 +57,7 @@ class Trails():
 #----------------------------------------------------------------------------
 # Add linepieces for trails based on traffic data
 
-    def update(self,t,aclat,aclon,lastlat,lastlon,lasttim,acid):
+    def update(self,t,aclat,aclon,lastlat,lastlon,lasttim,acid,trailcol):
 
 # Check for update
         delta = t-lasttim
@@ -72,7 +81,10 @@ class Trails():
             lstlat1.append(aclat[i])
             lstlon1.append(aclon[i])
             lsttime.append(t)
+
             self.acid.append(acid[i])
+            self.col.append(trailcol[i])
+
 
 # Update aircraft record
             lastlat[i] = aclat[i]
@@ -87,9 +99,8 @@ class Trails():
         self.time = np.concatenate((self.time,np.array(lsttime)))
 
 # Update colours
-        self.col = 255. *  \
-                  (1.-np.minimum(self.tcol0,np.abs(t-self.time))/self.tcol0)
-
+        self.fcol = (1.-np.minimum(self.tcol0,np.abs(t-self.time))/self.tcol0)
+      
 # Done
         return
 
@@ -103,8 +114,10 @@ class Trails():
         self.bglat1 = np.append(self.bglat1,self.lat1)
         self.bglon1 = np.append(self.bglon1,self.lon1)
         self.bgtime = np.append(self.bgtime,self.time)
+
 # No color saved: bBackground: always 'old color' self.col0
 
+        self.bgcol  = self.bgcol + self.col
         self.bgacid = self.bgacid + self.acid
         
         self.clearfg()  # Clear foreground trails

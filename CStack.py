@@ -938,7 +938,7 @@ class Commandstack:
 # TRAILS ON/OFF
                 elif cmd[:5]=="TRAIL":
                     if numargs==0:
-                        scr.echo("TRAILS ON/OFF [dt]")
+                        scr.echo("TRAIL ON/OFF [dt]/TRAIL acid color")
                         if traf.swtrails:
                             scr.echo("Trails are currently ON")
                             scr.echo("Trails dt="+str(traf.trails.dt))
@@ -957,6 +957,35 @@ class Commandstack:
                        elif cmdargs[1]=="OFF" or cmdargs[1]=="OF":
                            traf.swtrails = False
                            traf.trails.clear()
+
+                       elif len(cmdargs[1]) != 0:
+                           correctCommand = True
+                           # Check if a color was selected
+                           if len(cmdargs) == 2:
+                               scr.echo('Syntax error')
+                               scr.echo("TRAIL acid color")
+                               correctCommand = False
+
+                           if correctCommand:
+                               acid = cmdargs[1]
+                               color = cmdargs[2]
+
+                               # Does aircraft exist?
+                               idx = traf.id2idx(acid)
+                               if idx < 0:
+                                   scr.echo("TRAILS: " + acid + " not found.")
+                                   idx = -1
+                               # Does the color exist?
+                               if color not in ("BLUE", "RED", "YELLOW"):
+                                   scr.echo("Color not found, use BLUE, RED or YELLOW")
+                                   idx = -1
+
+                               # Change trail color of aircraft for which there are data
+                               if idx >= 0:
+#                                   print "color " + color
+#                                   print "index " + str(idx)
+                                   traf.changeTrailColor(color, idx)
+#                                   scr.echo("TRAIL color of " + acid + " switched to: " + color)
                        else:
                            scr.echo('Syntax error')
                            scr.echo("TRAILS ON/OFF")

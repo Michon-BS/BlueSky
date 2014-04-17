@@ -94,6 +94,7 @@ class Traffic():
 
 # Display information on label
         self.label = [] # Text and bitmap of traffic label
+        self.trailcol = [] # Trail color: default 'Blue'
 
 # Area
         self.inside = []
@@ -203,6 +204,7 @@ class Traffic():
         self.label.append(['','','',0])
 
 # Bread crumbs for trails
+        self.trailcol.append(self.trails.defcolor)
         self.lastlat = np.append(self.lastlat,aclat)
         self.lastlon = np.append(self.lastlon,aclon)
         self.lasttim = np.append(self.lasttim,0.0)
@@ -271,6 +273,7 @@ class Traffic():
         self.lastlat = np.delete(self.lastlat,idx)
         self.lastlon = np.delete(self.lastlon,idx)
         self.lasttim = np.delete(self.lasttim,idx)
+        del self.trailcol[idx]
 
 
 # Decrease number fo aircraft
@@ -377,7 +380,7 @@ class Traffic():
             if self.swtrails:
                 self.trails.update(sim.t, self.lat, self.lon,
                                self.lastlat, self.lastlon,
-                               self.lasttim, self.id)
+                               self.lasttim, self.id,self.trailcol)
             else:
                 self.lastlat = self.lat
                 self.lastlon = self.lon
@@ -453,3 +456,14 @@ class Traffic():
             return self.id.index(acid.upper())
         except:
             return -1
+
+#--------------------------------------------------------------------
+# Change color of aircraft trail
+
+    def changeTrailColor(self, color, idx):
+#        print color
+#        print idx
+#        print "     " + str(self.trails.colorsOfAC[idx])
+        self.trailcol[idx] = self.trails.colorList[color]
+#        print "     " + str(self.trails.colorsOfAC[idx])
+        return

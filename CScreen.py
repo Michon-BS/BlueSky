@@ -526,7 +526,7 @@ class Screen:
                 x1,y1 = self.ll2xy(traf.trails.bglat1,traf.trails.bglon1)         
 
                 for i in trlsel:
-                    pg.draw.aaline(self.radbmp,(0,0,255),    \
+                    pg.draw.aaline(self.radbmp,traf.trails.bgcol[i],    \
                                         (x0[i],y0[i]),(x1[i],y1[i]))
                 
 
@@ -586,7 +586,7 @@ class Screen:
 
 # Draw last trail part
                 if traf.swtrails:
-                    pg.draw.line(self.win,(0,255,255),
+                    pg.draw.line(self.win,tuple(traf.trailcol[i]),
                              (ltx[i],lty[i]), (trafx[i],trafy[i]))
 
      
@@ -637,7 +637,7 @@ class Screen:
                 x1,y1 = self.ll2xy(traf.trails.lat1,traf.trails.lon1)         
 
                 for i in trlsel:
-                    pg.draw.line(self.win,(0,int(traf.trails.col[i]),255),   \
+                    pg.draw.line(self.win,traf.trails.col[i],   \
                                         (x0[i],y0[i]),(x1[i],y1[i]))
 
 # Redraw background => buffer ; if >1500 foreground linepieces on screen
