@@ -17,135 +17,146 @@ Date        :
 
 import numpy as np
 
-class Trails():
-    
-    def __init__(self,dttrail=30.):
 
-        self.dt = dttrail               # Resolution of trail pieces in time
+class Trails():
+    def __init__(self, dttrail=30.):
+
+        self.dt = dttrail  # Resolution of trail pieces in time
 
         self.tcol0 = 60.  # After how many seconds old colour
 
 
-# This list contains some standard colors
-        self.colorList = {'BLUE': np.array([0, 0, 255]),      \
-                          'RED': np.array([255, 0, 0]),       \
+        # This list contains some standard colors
+        self.colorList = {'BLUE': np.array([0, 0, 255]), \
+                          'RED': np.array([255, 0, 0]), \
                           'YELLOW': np.array([255, 255, 0])}
-# Set default color to Blue
+        # Set default color to Blue
         self.defcolor = self.colorList['BLUE']
 
-# Foreground data on line pieces
+        # Foreground data on line pieces
         self.lat0 = np.array([])
         self.lon0 = np.array([])
         self.lat1 = np.array([])
         self.lon1 = np.array([])
         self.time = np.array([])
-        self.col  = []
+        self.col = []
         self.fcol = np.array([])
         self.acid = []
 
-# background copy of data
+        # background copy of data
         self.bglat0 = np.array([])
         self.bglon0 = np.array([])
         self.bglat1 = np.array([])
         self.bglon1 = np.array([])
         self.bgtime = np.array([])
-        self.bgcol  = [] 
+        self.bgcol = []
         self.bgacid = []
 
         return
 
-#----------------------------------------------------------------------------
-# Add linepieces for trails based on traffic data
+    #----------------------------------------------------------------------------
+    # Add linepieces for tr
+    # ails based on traffic data
 
-    def update(self,t,aclat,aclon,lastlat,lastlon,lasttim,acid,trailcol):
+    def update(self, t, aclat, aclon, lastlat, lastlon, lasttim, acid, trailcol):
 
-# Check for update
-        delta = t-lasttim
+        # Check for update
+        delta = t - lasttim
         idxs = np.where(delta > self.dt)[0]
 
-# Use temporary list for fast append
+        # Use temporary list for fast append
         lstlat0 = []
         lstlon0 = []
         lstlat1 = []
         lstlon1 = []
         lsttime = []
 
-# Add all a/c which need the update        
-#        if len(idxs)>0:
-#            print "len(idxs)=",len(idxs)
+        # Add all a/c which need the update
+        #        if len(idxs)>0:
+        #            print "len(idxs)=",len(idxs)
         for i in idxs:
 
-# Add to lists            
+            # Add to lists
             lstlat0.append(lastlat[i])
             lstlon0.append(lastlon[i])
             lstlat1.append(aclat[i])
             lstlon1.append(aclon[i])
             lsttime.append(t)
-
             self.acid.append(acid[i])
+
+            if type(self.col) == type(np.array(1)):
+                #print type(trailcol[i])
+                #print trailcol[i]
+                #print "col type: ",type(self.col)
+                self.col = self.col.tolist()
+            type(self.col)
             self.col.append(trailcol[i])
 
 
-# Update aircraft record
+            # Update aircraft record
             lastlat[i] = aclat[i]
             lastlon[i] = aclon[i]
             lasttim[i] = t
 
-# Add resulting linepieces
-        self.lat0 = np.concatenate((self.lat0,np.array(lstlat0)))
-        self.lon0 = np.concatenate((self.lon0,np.array(lstlon0)))
-        self.lat1 = np.concatenate((self.lat1,np.array(lstlat1)))
-        self.lon1 = np.concatenate((self.lon1,np.array(lstlon1)))
-        self.time = np.concatenate((self.time,np.array(lsttime)))
+        # Add resulting linepieces
+        self.lat0 = np.concatenate((self.lat0, np.array(lstlat0)))
+        self.lon0 = np.concatenate((self.lon0, np.array(lstlon0)))
+        self.lat1 = np.concatenate((self.lat1, np.array(lstlat1)))
+        self.lon1 = np.concatenate((self.lon1, np.array(lstlon1)))
+        self.time = np.concatenate((self.time, np.array(lsttime)))
 
-# Update colours
-        self.fcol = (1.-np.minimum(self.tcol0,np.abs(t-self.time))/self.tcol0)
-      
-# Done
+        # Update colours
+        self.fcol = (1. - np.minimum(self.tcol0, np.abs(t - self.time)) / self.tcol0)
+
+        # Done
         return
 
-#----------------------------------------------------------------------------
-# Buffer trails: Move current stack to background
+    #----------------------------------------------------------------------------
+    # Buffer trails: Move current stack to background
 
     def buffer(self):
-        
-        self.bglat0 = np.append(self.bglat0,self.lat0)
-        self.bglon0 = np.append(self.bglon0,self.lon0)
-        self.bglat1 = np.append(self.bglat1,self.lat1)
-        self.bglon1 = np.append(self.bglon1,self.lon1)
-        self.bgtime = np.append(self.bgtime,self.time)
 
-# No color saved: bBackground: always 'old color' self.col0
+        self.bglat0 = np.append(self.bglat0, self.lat0)
+        self.bglon0 = np.append(self.bglon0, self.lon0)
+        self.bglat1 = np.append(self.bglat1, self.lat1)
+        self.bglon1 = np.append(self.bglon1, self.lon1)
+        self.bgtime = np.append(self.bgtime, self.time)
 
-        self.bgcol  = self.bgcol + self.col
+        # No color saved: bBackground: always 'old color' self.col0
+        if type(self.bgcol) == type(np.array(1)):
+            self.bgcol = self.bgcol.tolist()
+        if type(self.col) == type(np.array(1)):
+            self.col = self.col.tolist()
+
+        self.bgcol = self.bgcol + self.col
         self.bgacid = self.bgacid + self.acid
-        
+
         self.clearfg()  # Clear foreground trails
 
         return
 
-#----------------------------------------------------------------------------
-# Clear trails foreground
+    #----------------------------------------------------------------------------
+    # Clear trails foreground
 
-    def clearfg(self):   # Foreground
+    def clearfg(self):  # Foreground
 
- # Data on foreground line pieces
+        # Data on foreground line pieces
         self.lat0 = np.array([])
         self.lon0 = np.array([])
         self.lat1 = np.array([])
         self.lon1 = np.array([])
         self.time = np.array([])
-        self.col  = np.array([]) 
+        self.col = np.array([])
         self.acid = []
 
-        return       # Clear trails
+        return  # Clear trails
 
-#----------------------------------------------------------------------------
-# Clear trails background
+    #----------------------------------------------------------------------------
+    # Clear trails background
 
-    def clearbg(self):   # Background
+    def clearbg(self):  # Background
 
- # Data on background line pieces
+        # Data on background line pieces
         self.bglat0 = np.array([])
         self.bglon0 = np.array([])
         self.bglat1 = np.array([])
@@ -155,9 +166,9 @@ class Trails():
 
         return
 
-#----------------------------------------------------------------------------
-# Clear all data
-    def clear(self):   # Foreground and background
+    #----------------------------------------------------------------------------
+    # Clear all data
+    def clear(self):  # Foreground and background
 
         self.clearfg()
         self.clearbg()
