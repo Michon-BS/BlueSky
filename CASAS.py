@@ -55,7 +55,7 @@ class ASAS():
         du = np.array(u - u.T)
         dv = np.array(v - v.T)
         
-        tcpa = -(du*dx + dv*dy) /      \
+        tcpa = -(du*dx + dv*dy) /       \
                  (du*du + dv*dv         \
                  + np.array(np.eye(du[:,0].size)))
 
@@ -79,8 +79,11 @@ class ASAS():
                          (distcpa2<self.R*self.R)*                     \
                          (tcross >= 0.)*(tcross <= self.dtlookahead))
 
-# TODO: Calculate CPA positions of traffic in lat/lon
+# Calculate CPA positions of traffic in lat/lon
 
+# Select conflicting pairs: each a/c get their own record
+ 
+    
 # First try simplest method (mercator)
 
         return
